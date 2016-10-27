@@ -22,14 +22,15 @@ public class SprPlatform extends Sprite {
 
     void update(float nDinoX) {
         fX--;
-
+        
         if (fX <= (0 - sprImg.getWidth())) {
             fX = (nDinoX + (Gdx.graphics.getWidth()));
+            fY = (((Gdx.graphics.getHeight() - nDinoX) / 3) * ((int) (Math.random() * 3 + 0)));
         }
     }
 
     void setY(int _nDinoHei) {
-        fY = (((Gdx.graphics.getHeight() - _nDinoHei) / 3) * ((int) (Math.random() * 2 + 1)));
+        fY = (((Gdx.graphics.getHeight() - _nDinoHei) / 3) * ((int) (Math.random() * 3 + 0)));
 
     }
 

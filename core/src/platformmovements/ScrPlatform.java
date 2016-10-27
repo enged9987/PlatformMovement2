@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Vector2;
 
 public class ScrPlatform implements Screen, InputProcessor {
 
@@ -18,11 +19,12 @@ public class ScrPlatform implements Screen, InputProcessor {
     Texture txDino, txPlat;
     SprDino sprDino;
     SprPlatform sprPlatform, sprPlatform2;
-    int nScreenWid = Gdx.graphics.getWidth(), nDinoHei, nScreenX, nScreen;
+    int nScreenWid = Gdx.graphics.getWidth(), nDinoHei, nScreenX;
     Sprite sprBack, sprBack2;
     float fScreenWidth = Gdx.graphics.getWidth(), fScreenHei = Gdx.graphics.getHeight();
     private float fVy;
     private float fVx;
+    Vector2 vBackDir, vBackPos;
     OrthographicCamera camBack, camBack2;
 
     public ScrPlatform(Game _game) {
@@ -32,18 +34,16 @@ public class ScrPlatform implements Screen, InputProcessor {
         txPlat = new Texture("Platform.png");
         sprBack = new Sprite(new Texture(Gdx.files.internal("world.jpg")));
         sprBack.setSize(fScreenWidth, fScreenHei);
-        sprBack2 = new Sprite(new Texture(Gdx.files.internal("world.jpg")));
-        sprBack2.setSize(fScreenWidth, fScreenHei);
-        float aspectratio = (float) Gdx.graphics.getHeight() / Gdx.graphics.getWidth();
+        //float aspectratio = (float) Gdx.graphics.getHeight() / Gdx.graphics.getWidth();
         Gdx.input.setInputProcessor((this));
         Gdx.graphics.setDisplayMode(800, 500, false);
-        camBack = new OrthographicCamera(fScreenWidth * aspectratio, fScreenHei);
-        camBack2 = new OrthographicCamera(fScreenWidth * aspectratio, fScreenHei);
+        camBack = new OrthographicCamera(fScreenWidth /** aspectratio*/, fScreenHei);
         camBack.position.set(fScreenWidth / 2, fScreenHei / 2, 0);
-        camBack2.position.set(fScreenWidth / 2 + Gdx.graphics.getWidth(), fScreenHei / 2, 0);
         sprDino = new SprDino("Dinosaur.png", 0, 0);
         sprPlatform = new SprPlatform("Platform.png", 0, 0);
         sprPlatform2 = new SprPlatform("Platform.png", 0, 0);
+        vBackDir = new Vector2(2f, 0f);
+        vBackPos = new Vector2(0f, 0f);
         nDinoHei = txDino.getHeight();
         sprPlatform.setX(nScreenWid);
         sprPlatform2.setX(nScreenWid);
@@ -63,28 +63,37 @@ public class ScrPlatform implements Screen, InputProcessor {
         sprPlatform.update(sprDino.getX());
         sprPlatform2.update(sprDino.getX());
         camBack.update();
-        camBack2.update();
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
         if ((nScreenX < -Gdx.graphics.getWidth() || nScreenX > Gdx.graphics.getWidth())) {
             nScreenX = 0;
         }
         batch.setProjectionMatrix(camBack.combined);
-        batch.draw(sprBack, nScreenX, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        batch.draw(sprBack, nScreenX-Gdx.graphics.getWidth(), 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        batch.draw(sprBack, nScreenX+Gdx.graphics.getWidth(), 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(sprBack, vBackPos.x, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(sprBack, vBackPos.x - Gdx.graphics.getWidth(), 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(sprBack, vBackPos.x + Gdx.graphics.getWidth(), 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.draw(sprDino.getSprite(), sprDino.getX(), sprDino.getY());
         batch.draw(sprPlatform.getSprite(), sprPlatform.getX(), sprPlatform.getY());
         batch.draw(sprPlatform2.getSprite(), sprPlatform.getX(), sprPlatform.getY());
-        if(sprBack.getX() > 0) {
-            nScreenX ++;
-            //use camera.translate
-        } else if (sprBack.getX()<0) {
-            sprBack.setX(0f);
-        }
-        nScreenX --;
-
         batch.end();
+        //if (sprDino.getX() > (fScreenWidth/2)) {
+            if (sprDino.getX() <= fScreenWidth&&sprDino.getX() >= (fScreenWidth/4)) {
+                //nScreenX -= fVx;
+                vBackPos.add(vBackDir);
+                //camBack.translate(vBackDir);
+                //nScreenX += 2;
+                System.out.println("Im Here");
+                //use camera.translate
+
+            } /*else if (sprBack.getX() < 0) {
+             fVx = 0;
+             nScreenX = 0;
+             }*/
+            //nScreenX -= fVx;
+        //}
+
+
+        
     }
 
     @Override
@@ -119,13 +128,15 @@ public class ScrPlatform implements Screen, InputProcessor {
             System.exit(3);
         } else if (keycode == Input.Keys.UP) {
             fVy = 2;
-            System.out.println("UP");
+            
         } else if (keycode == Input.Keys.DOWN) {
             fVy = -2;
         } else if (keycode == Input.Keys.LEFT) {
             fVx = -2;
+            vBackDir.set(2, 0);
         } else if (keycode == Input.Keys.RIGHT) {
             fVx = 2;
+            vBackDir.set(-2, 0);
         }
         return false;
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -134,8 +145,7 @@ public class ScrPlatform implements Screen, InputProcessor {
     @Override
     public boolean keyUp(int keycode) {
         if (keycode == Input.Keys.UP) {
-            fVy = 0;
-            System.out.println("UP");
+            fVy = 0;            
         } else if (keycode == Input.Keys.DOWN) {
             fVy = 0;
         } else if (keycode == Input.Keys.LEFT) {
